@@ -282,6 +282,13 @@ export default function SaarthiVoicePage() {
   const startSpeechRecognition = () => {
     if (typeof window === "undefined") return;
 
+    // Detect mobile device to bypass Web Speech API (prevents native iOS/Android listener beeps)
+    const isMobileDevice = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+    if (isMobileDevice) {
+      console.log("Mobile browser detected. Bypassing SpeechRecognition to prevent OS system beeps.");
+      return;
+    }
+
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
       console.warn("Web Speech API is not supported in this browser. Live user captions disabled.");
