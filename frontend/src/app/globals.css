@@ -1,0 +1,69 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", "SF Pro Display", sans-serif;
+  --font-serif: "Cormorant Garamond", serif;
+
+  --color-base-bg: #F8F6F2;
+  --color-lotus-mist: #F4EAE6;
+  --color-sacred-blush: #E7C8C0;
+  --color-meditation-lavender: #DCCFE3;
+  --color-spiritual-gold: #C9A86A;
+  
+  --color-text-primary: #2F2A27;
+  --color-text-secondary: #6B625C;
+  --color-text-muted: #A89F98;
+
+  --radius-sacred: 24px;
+}
+
+@layer base {
+  body {
+    @apply bg-base-bg text-text-primary font-sans antialiased;
+    background-image: radial-gradient(
+      circle at top right,
+      rgba(231, 200, 192, 0.15),
+      transparent 40%
+    );
+    min-height: 100vh;
+  }
+
+  h1, h2, h3, .font-serif {
+    @apply font-serif;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-white/40 backdrop-blur-md border border-white/20 shadow-sm rounded-sacred;
+  }
+
+  .sacred-glow {
+    @apply relative;
+  }
+
+  .sacred-glow::after {
+    content: '';
+    @apply absolute inset-0 rounded-full blur-3xl -z-10 bg-sacred-blush/20 pointer-events-none;
+  }
+}
+
+/* Custom animations for the 'Alive' feeling */
+@keyframes soft-breathe {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.02); opacity: 1; }
+}
+
+.animate-soft-breathe {
+  animation: soft-breathe 8s ease-in-out infinite;
+}
+
+.floating-particle {
+  @apply fixed pointer-events-none -z-10 opacity-30;
+  animation: float 20s linear infinite;
+}
+
+@keyframes float {
+  from { transform: translateY(100vh) rotate(0deg); }
+  to { transform: translateY(-10vh) rotate(360deg); }
+}
