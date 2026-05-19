@@ -155,7 +155,7 @@ export default function ChatInterface({
 
     try {
       // Pass the conversation history so Gemini is context-aware (Delayed Injection)
-      const response = await axios.post("http://localhost:5000/api/chat", {
+      const response = await axios.post("https://digital-sanctuary-ou9k.onrender.com/api/chat", {
         message: input,
         history: messages,
       });

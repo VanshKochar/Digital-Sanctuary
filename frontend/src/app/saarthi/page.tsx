@@ -76,7 +76,7 @@ export default function SaarthiVoicePage() {
       const savedSessionId = localStorage.getItem("active_voice_session_id");
       if (savedSessionId) {
         setStatus("Restoring memory...");
-        fetch(`http://localhost:5000/api/voice/session/${savedSessionId}`)
+        fetch(`https://digital-sanctuary-ou9k.onrender.com/api/voice/session/${savedSessionId}`)
           .then(res => {
             if (res.ok) return res.json();
             throw new Error("Session not found inside MongoDB");
@@ -212,7 +212,7 @@ export default function SaarthiVoicePage() {
       micStreamRef.current = micStream;
 
       // 2. Setup past context memory parameter if activeSession is present
-      let wsUrl = "ws://localhost:5000/api/voice";
+      let wsUrl = "wss://digital-sanctuary-ou9k.onrender.com/api/voice";
       if (activeSessionIdRef.current && voiceMessagesRef.current.length > 0) {
         const pastText = voiceMessagesRef.current
           .map((m) => `${m.role === "user" ? "User" : "Saarthi"}: ${m.content}`)
@@ -450,7 +450,7 @@ export default function SaarthiVoicePage() {
         window.dispatchEvent(new Event("historyUpdated"));
 
         // Persist to MongoDB backend
-        fetch("http://localhost:5000/api/voice/session", {
+        fetch("https://digital-sanctuary-ou9k.onrender.com/api/voice/session", {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
