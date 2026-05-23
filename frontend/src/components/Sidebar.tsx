@@ -160,13 +160,13 @@ export default function Sidebar({
                   <span className="text-[9px] uppercase tracking-widest font-bold text-text-muted">
                     Navigation
                   </span>
-                  <div className="grid grid-cols-2 gap-2 mt-1">
+                  <div className="grid grid-cols-3 gap-1.5 mt-1">
                     <Link
                       href="/"
                       onClick={onClose}
-                      className={`px-3 py-2.5 rounded-sacred text-center text-xs font-semibold tracking-wider transition-all border ${
+                      className={`px-1 py-2 rounded-sacred text-center text-[10px] font-bold tracking-wider transition-all border ${
                         pathname === "/"
-                          ? "bg-text-primary text-base-bg border-text-primary"
+                          ? "bg-text-primary text-base-bg border-text-primary shadow-sm"
                           : "bg-white/40 border-white/50 text-text-secondary hover:bg-white/80"
                       }`}
                     >
@@ -175,13 +175,24 @@ export default function Sidebar({
                     <Link
                       href="/saarthi"
                       onClick={onClose}
-                      className={`px-3 py-2.5 rounded-sacred text-center text-xs font-semibold tracking-wider transition-all border ${
+                      className={`px-1 py-2 rounded-sacred text-center text-[10px] font-bold tracking-wider transition-all border ${
                         pathname === "/saarthi"
-                          ? "bg-text-primary text-base-bg border-text-primary"
+                          ? "bg-text-primary text-base-bg border-text-primary shadow-sm"
                           : "bg-white/40 border-white/50 text-text-secondary hover:bg-white/80"
                       }`}
                     >
                       Saarthi Voice
+                    </Link>
+                    <Link
+                      href="/inner-atlas"
+                      onClick={onClose}
+                      className={`px-1 py-2 rounded-sacred text-center text-[10px] font-bold tracking-wider transition-all border ${
+                        pathname === "/inner-atlas"
+                          ? "bg-text-primary text-base-bg border-text-primary shadow-sm"
+                          : "bg-white/40 border-white/50 text-text-secondary hover:bg-white/80"
+                      }`}
+                    >
+                      Inner Atlas
                     </Link>
                   </div>
                 </nav>
@@ -212,7 +223,7 @@ export default function Sidebar({
                     </div>
                   ) : (
                     <div className="flex flex-col gap-2">
-                      {chatHistory.map((session) => {
+                      {chatHistory.map((session, i) => {
                         const firstUserMessage = session.messages.find(m => m.role === "user")?.content || "Reflection journey";
                         const truncatedMessage = firstUserMessage.length > 55 
                           ? firstUserMessage.substring(0, 52) + "..." 
@@ -220,7 +231,7 @@ export default function Sidebar({
 
                         return (
                           <button
-                            key={session.id}
+                            key={session.id || `chat-${i}`}
                             onClick={() => {
                               if (onSelectChat) {
                                 onSelectChat(session);
@@ -236,7 +247,7 @@ export default function Sidebar({
                             <MessageSquare className="w-4 h-4 text-sacred-blush/80 flex-shrink-0 mt-0.5" />
                             <div className="flex-1 min-w-0">
                               <p className="text-xs font-medium leading-relaxed truncate group-hover:text-text-primary">
-                                "{truncatedMessage}"
+                                &quot;{truncatedMessage}&quot;
                               </p>
                               <span className="text-[9px] text-text-muted block mt-1">
                                 {formatDate(session.timestamp)}
@@ -262,9 +273,9 @@ export default function Sidebar({
                     </div>
                   ) : (
                     <div className="flex flex-col gap-2">
-                      {voiceHistory.map((session) => (
+                      {voiceHistory.map((session, i) => (
                         <button
-                          key={session.id}
+                          key={session.id || `voice-${i}`}
                           onClick={() => {
                             if (onSelectVoice) {
                               onSelectVoice(session);
@@ -345,7 +356,7 @@ export default function Sidebar({
                 
                 <div className="border-t border-sacred-blush/20 pt-4 max-h-60 overflow-y-auto scrollbar-hide">
                   <p className="text-text-secondary text-sm italic leading-relaxed whitespace-pre-wrap">
-                    "{selectedVoiceSession.transcript}"
+                    &quot;{selectedVoiceSession.transcript}&quot;
                   </p>
                 </div>
               </div>

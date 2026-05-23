@@ -24,6 +24,7 @@ app.get('/', (req, res) => {
 
 // Import and use routes
 app.use('/api/chat', require('./routes/chatRoutes'));
+app.use('/api/inner-atlas', require('./routes/atlasRoutes'));
 
 // Create HTTP Server & Initialize WebSocket Server
 const http = require('http');

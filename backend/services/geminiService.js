@@ -117,6 +117,136 @@ async function getArjunaResponse(userInput, history = []) {
   }
 }
 
-module.exports = { getArjunaResponse };
+/**
+ * Analyzes a list of daily check-in logs and generates 4-6 gentle, non-clinical bullet-point insights.
+ */
+async function getAtlasInsights(logs = []) {
+  try {
+    const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite" });
+
+    if (logs.length === 0) {
+      return ["Your emotional dashboard is currently a clean slate. Once you begin check-ins, I will help you find the underlying patterns of your thoughts, sleep, and habits."];
+    }
+
+    const formattedLogs = logs.map(log => {
+      const sleepStr = log.sleep?.bedTime ? `Sleep: ${log.sleep.bedTime}→${log.sleep.wakeTime}` : '';
+      const exerciseStr = (log.exercises || []).map(e => `${e.name}(${e.duration}min)`).join(', ');
+      const parts = [
+        `Date: ${log.date}`,
+        `Mood: ${log.mood}`,
+        log.emotions?.length  ? `Emotions: [${log.emotions.join(', ')}]`  : '',
+        log.hobbies?.length   ? `Hobbies: [${log.hobbies.join(', ')}]`    : '',
+        log.selfCare?.length  ? `SelfCare: [${log.selfCare.join(', ')}]`  : '',
+        log.health?.length    ? `Health: [${log.health.join(', ')}]`      : '',
+        log.people?.length    ? `People: [${log.people.join(', ')}]`      : '',
+        log.weather           ? `Weather: ${log.weather}`                 : '',
+        log.steps             ? `Steps: ${log.steps}`                     : '',
+        exerciseStr           ? `Exercise: [${exerciseStr}]`              : '',
+        sleepStr,
+        log.music             ? `Music: ${log.music}`                     : '',
+        log.note              ? `Note: "${log.note}"`                     : '',
+        log.gratitude?.filter(g=>g).length ? `Grateful for: [${log.gratitude.filter(g=>g).join(' | ')}]` : '',
+      ].filter(Boolean);
+      return `- ${parts.join(', ')}`;
+    }).join("\n");
+
+    const prompt = `
+      You are "Inner Atlas Insights", a gentle, highly observant emotional intelligence companion.
+      You help Gen Z users recognize subtle connections between their habits, sleep, social interactions, weather, and mood.
+      
+      User's Logged History:
+      ${formattedLogs}
+      
+      Your rules:
+      1. Be completely non-clinical. Do not diagnose, pathologize, or use diagnostic terms (e.g. "depressed", "unstable", "clinically anxious").
+      2. Sound like a caring, slightly wise senior or a peaceful hostel friend at 2 AM. Keep it conversational and grounded.
+      3. Draw connections between mood and logged activities where relevant (e.g., correlations with sleep, scrolling, alone time, study deadlines, social activities).
+      4. Format your output strictly as a JSON list of 4 to 6 gentle, empathetic insight bullet points.
+      
+      Return ONLY a JSON array of strings.
+      Example format:
+      [
+        "Insight 1...",
+        "Insight 2..."
+      ]
+    `;
+
+    const result = await model.generateContent(prompt);
+    let parsed;
+    try {
+      parsed = JSON.parse(result.response.text().replace(/```json|```/g, "").trim());
+    } catch (e) {
+      console.warn("Failed to parse Insights JSON, building fallback array:", e);
+      // Fallback simple split if parsing fails
+      const text = result.response.text();
+      parsed = text.split("\n").map(l => l.replace(/^[-\*\s\d\.\"]+|[\"\s,]+$/g, "").trim()).filter(l => l.length > 10);
+    }
+    return parsed;
+  } catch (error) {
+    console.error("Gemini Atlas Insights Error:", error);
+    return ["I was unable to retrieve your pattern correlations this time. Let's check back in shortly."];
+  }
+}
+
+/**
+ * Generates a poetic, comforting, and atmospheric Weekly AI Reflection Letter summarizing their logs.
+ */
+async function getWeeklyReflectionLetter(logs = []) {
+  try {
+    const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite" });
+
+    if (logs.length === 0) {
+      return "Dear Traveler,\n\nYour emotional sanctuary is waiting. Once you map your daily check-ins for the week, I will draft a comforting reflection letter of your emotional seasons here.\n\nWarmly,\nYour Saarthi";
+    }
+
+    const formattedLogs = logs.map(log => {
+      const sleepStr = log.sleep?.bedTime ? `Sleep: ${log.sleep.bedTime}→${log.sleep.wakeTime}` : '';
+      const exerciseStr = (log.exercises || []).map(e => `${e.name}(${e.duration}min)`).join(', ');
+      const parts = [
+        `Date: ${log.date}`,
+        `Mood: ${log.mood}`,
+        log.emotions?.length  ? `Emotions: [${log.emotions.join(', ')}]`  : '',
+        log.hobbies?.length   ? `Hobbies: [${log.hobbies.join(', ')}]`    : '',
+        log.weather           ? `Weather: ${log.weather}`                 : '',
+        log.steps             ? `Steps: ${log.steps}`                     : '',
+        exerciseStr           ? `Exercise: [${exerciseStr}]`              : '',
+        sleepStr,
+        log.music             ? `Music: ${log.music}`                     : '',
+        log.note              ? `Note: "${log.note}"`                     : '',
+        log.gratitude?.filter(g=>g).length ? `Grateful for: [${log.gratitude.filter(g=>g).join(' | ')}]` : '',
+      ].filter(Boolean);
+      return `- ${parts.join(', ')}`;
+    }).join("\n");
+
+    const prompt = `
+      You are "Saarthi", writing a deeply personalized, poetic, and soothing Weekly Reflection Letter for a young user.
+      This letter should summarize their emotional landscape, stress cycles, and small moments of peace from the past week.
+      
+      Logs from the past week:
+      ${formattedLogs}
+      
+      Your rules:
+      1. Write in a deeply reflective, reassuring, and atmospheric tone. It should feel like a hand-written letter sent from a wise friend.
+      2. Group their days into seasons or patterns. Gently reflect on what drained them (e.g., academic pressure, scrolling spirals) and what restored them (e.g., self-care, hobbies, walking).
+      3. Never be clinical or scary. It should feel like a warm hug for their mind.
+      4. Keep it strictly between 10 to 15 lines of text, well-structured in paragraphs.
+      5. End with a warm, caring sign-off like "Warmly, Your Saarthi" or "Wishing you quiet moments, Saarthi".
+      
+      Return ONLY the plain text of the letter.
+    `;
+
+    const result = await model.generateContent(prompt);
+    return result.response.text().trim();
+  } catch (error) {
+    console.error("Gemini Weekly Reflection Letter Error:", error);
+    return "Dear Traveler,\n\nI tried to reflect on your week, but the visual clouds got in the way. I hope you can find a moment of peace today regardless.\n\nWarmly,\nYour Saarthi";
+  }
+}
+
+module.exports = { 
+  getArjunaResponse,
+  getAtlasInsights,
+  getWeeklyReflectionLetter
+};
 
 

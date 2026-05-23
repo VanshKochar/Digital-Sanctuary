@@ -66,12 +66,18 @@ export default function Home() {
             <p className="text-lg font-serif italic text-text-secondary">
               Peace begins within.
             </p>
-            <div className="pt-1">
+            <div className="flex flex-wrap justify-center gap-3 pt-2">
               <Link
                 href="/saarthi"
-                className="inline-flex items-center gap-2 bg-text-primary text-base-bg px-5 py-2.5 rounded-full hover:opacity-90 transition-all text-[10px] font-semibold tracking-widest uppercase shadow-md focus:outline-none focus:ring-2 focus:ring-text-primary"
+                className="inline-flex items-center gap-2 bg-text-primary text-base-bg px-5 py-2.5 rounded-full hover:opacity-90 transition-all text-[10px] font-semibold tracking-widest uppercase shadow-md focus:outline-none focus:ring-2 focus:ring-text-primary cursor-pointer"
               >
                 🎙️ Saarthi AI (Voice)
+              </Link>
+              <Link
+                href="/inner-atlas"
+                className="inline-flex items-center gap-2 bg-white/60 text-text-primary px-5 py-2.5 rounded-full hover:bg-white/80 border border-white/50 transition-all text-[10px] font-semibold tracking-widest uppercase shadow-sm focus:outline-none focus:ring-2 focus:ring-sacred-blush cursor-pointer"
+              >
+                🗺️ Inner Atlas
               </Link>
             </div>
           </div>

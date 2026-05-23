@@ -622,7 +622,7 @@ export default function SaarthiVoicePage() {
         <div className="text-center space-y-4">
           <h1 className="text-5xl md:text-6xl font-serif text-text-primary tracking-tight">Saarthi AI</h1>
           <p className="text-text-secondary italic text-base md:text-lg max-w-sm mx-auto leading-relaxed">
-            "Your companion in moments of verbal reflection."
+            &quot;Your companion in moments of verbal reflection.&quot;
           </p>
         </div>
 
