@@ -1,213 +1,77 @@
-Problem Statement — AI-Powered Mental Wellness Companion Inspired by Bhagavad Gita
+# Re.Mind: Your Digital Sanctuary
 
-I am building a modern AI-powered mental wellness web app for Gen Z and young users (primarily below age 25) that combines the timeless wisdom of the Bhagavad Gita with modern psychology concepts like CBT (Cognitive Behavioral Therapy), emotional reflection, mindfulness, and supportive AI conversation.
+Re.Mind is an emotionally intelligent, AI-supported web application designed as an antidote to digital noise. Instead of endless scrolling, complicated journaling, or clinical therapy interfaces, Re.Mind offers a deliberately slow, quiet space to help users lower their cortisol, foster self-awareness, and process their emotional landscape without judgment.
 
-The goal is NOT to create a religious preaching platform or a simple chatbot.
+Built primarily for Gen Z and young adults, Re.Mind blends modern psychology, deep emotional tracking, and the subtle, timeless wisdom of the Bhagavad Gita into a beautifully minimalist aesthetic.
 
-The goal is to create a calming, emotionally intelligent digital companion that helps users during moments of stress, confusion, sadness, overthinking, loneliness, anxiety, lack of motivation, heartbreak, burnout, self-doubt, or emotional instability.
+---
 
-Core Idea
+## The Four Pathways
 
-When a user enters their emotional state or personal problem in natural language, the system should:
+Re.Mind offers four distinct pathways to support your mental wellness journey:
 
-Understand the emotional context using Gemini AI
-Detect emotions/intensity/themes
-Search a curated Bhagavad Gita verse database
-Find the most relevant shloka for the situation
-Explain the meaning in simple modern language
-Translate Sanskrit into easy Hindi + English
-Connect the wisdom with practical modern-life guidance
-Add lightweight CBT/self-reflection ideas
-Deliver the response in a short, emotionally engaging, non-boring format
+### 1. Arjuna Mode (The 2 AM Friend)
+Arjuna Mode is a text-based, highly empathetic journaling companion. It acts like a grounded friend who listens first, analyzes your emotional state using a custom **5-Level Emotional Intensity Framework**, and helps you untangle your thoughts. It does not rush to "fix" you; instead, it holds space for your feelings and naturally weaves in subtle ancient wisdom when the moment is right.
 
-The experience should feel:
+### 2. Saarthi AI (The Vocal Guide)
+Sometimes, typing takes too much effort when your mind is racing. Saarthi is an advanced conversational AI designed for real-time emotional processing through voice. You can speak your mind aloud, and Saarthi responds with a comforting, synthesized voice—guiding you through anxiety, overthinking, or loneliness through organic, human-like conversation.
 
-calm
-aesthetic
-interactive
-emotionally safe
-modern
-youthful
-comforting
-not lecture-heavy
-Problem With Existing Solutions
+### 3. Inner Atlas (The Emotional Map)
+Inner Atlas is a rich daily tracker that connects your sleep, habits, daily events, and emotions. As you log your days, the Re.Mind AI engine works in the background to discover hidden patterns (e.g., how a lack of sleep affects your specific anxieties). Inner Atlas provides actionable insights and generates a poetic, comforting Weekly Reflection Letter summarizing your emotional seasons.
 
-Current mental wellness apps often:
+### 4. The Sanctuary (Calm Space)
+A dedicated, distraction-free environment for mindfulness. The Sanctuary offers ambient nature soundscapes (Rainfall, Deep Forest, Soft Wind) and a serene meditation timer. When you complete a meditation session, it safely and automatically syncs your peaceful minutes directly into your Inner Atlas log for the day.
 
-feel too clinical
-are boring to read
-give generic AI answers
-lack emotional depth
-are disconnected from Indian culture/spirituality
-overload users with long paragraphs
-feel robotic
+---
 
-Young users usually do NOT want:
+## Design & UI Philosophy
 
-lengthy therapy text
-heavy spiritual lectures
-complicated journaling
-hard-to-read paragraphs
+Re.Mind completely strips away the "corporate SaaS" aesthetic. You will not find heavy borders, cluttered dashboards, or clinical textbook paragraphs. 
 
-They want:
+- **Aesthetics**: Ultra-minimalist, typography-focused layouts.
+- **Color Palette**: Calming, earthy tones (`brand-forest`, `brand-sage`, `brand-peach`, soft cream backgrounds).
+- **Interactions**: Smooth, slow animations using Framer Motion that respect the user's nervous system.
+- **Tone**: Socially human, naturally curious, warm, and poetic.
 
-short guidance
-emotional validation
-relatable responses
-aesthetic UI
-conversational interaction
-quick emotional relief
-practical steps
-Target Audience
+---
 
-Primary audience:
+## Tech Stack
 
-Gen Z
-Gen Alpha
-college students
-stressed young professionals
-users below age 25
+**Frontend:**
+- React 18 / Next.js (App Router)
+- Tailwind CSS (Custom thematic design system)
+- Framer Motion (Fluid UI transitions)
+- Lucide React (Minimalist iconography)
 
-Common emotional situations:
+**Backend:**
+- Node.js & Express
+- MongoDB / Mongoose (Storing emotional logs, insights, and Bhagavad Gita verses)
+- Google Gemini AI (`gemini-3.1-flash-lite` for conversational and poetic generation, `gemini-2.5-flash` for complex pattern synthesis)
 
-exam stress
-loneliness
-overthinking
-breakup pain
-comparison/social media pressure
-lack of direction
-burnout
-self-worth issues
-anxiety
-motivation loss
-Main Features
-1. Arjuna Mode
+---
 
-User shares a problem like:
+## Getting Started
 
-“I feel lost and anxious about my future.”
+To run the project locally, you will need to start both the backend and frontend servers.
 
-The AI:
+### 1. Backend Setup
+1. Navigate to the `backend/` directory.
+2. Ensure you have your `.env` file set up with your MongoDB URI and Gemini API Key:
+   ```env
+   MONGO_URI=your_mongo_connection_string
+   GEMINI_API_KEY=your_gemini_api_key
+   PORT=5000
+   ```
+3. Run `npm install`
+4. Run `npm run dev`
 
-identifies emotions
-finds a relevant Gita verse
-explains it conversationally
-gives modern interpretation
-suggests a small practical action
+### 2. Frontend Setup
+1. Navigate to the `frontend/` directory.
+2. Ensure you have your `.env.local` set up to point to the backend:
+   ```env
+   NEXT_PUBLIC_API_URL=http://localhost:5000/api
+   ```
+3. Run `npm install`
+4. Run `npm run dev`
 
-Response should be SHORT and impactful.
-
-2. Dual Lens Mode
-
-Shows:
-
-Ancient Wisdom Lens (Bhagavad Gita insight)
-Modern Psychology Lens (CBT/mindfulness perspective)
-
-Both should complement each other.
-
-3. Emotion Detection
-
-Gemini AI analyzes:
-
-tone
-emotional intensity
-stress category
-mindset patterns
-4. Mood Journey
-
-Optional emotional tracking:
-
-daily mood check-ins
-emotional streaks
-calming insights
-growth visualization
-5. Audio/Interactive Experience
-
-Instead of long text:
-
-short cards
-swipe-based UI
-calming animations
-voice narration
-breathing prompts
-tiny reflection exercises
-Important Product Philosophy
-
-This is NOT:
-
-therapy replacement
-medical diagnosis
-hardcore religious app
-generic AI chatbot
-
-This IS:
-
-emotionally supportive guidance system
-culturally rooted wellness experience
-AI-powered reflective companion
-Technical Direction
-Frontend
-
-Modern aesthetic web app using:
-
-React / Next.js
-Tailwind CSS
-Framer Motion
-glassmorphism + soft gradients
-lotus-inspired UI elements
-pink + white calming theme
-Backend
-
-Node.js + Express backend
-
-Responsibilities:
-
-Gemini API integration
-emotion analysis
-verse retrieval
-response orchestration
-user session handling
-Database
-
-MongoDB stores:
-
-Bhagavad Gita verses
-translations
-themes
-emotional tags
-CBT mapping
-user mood logs
-AI Responsibilities (Gemini)
-
-Gemini AI should:
-
-understand user emotion deeply
-personalize responses
-keep responses concise
-avoid robotic tone
-maintain empathetic conversational style
-generate emotionally intelligent outputs
-UI/UX Vision
-
-The app should feel like:
-
-a peaceful safe space
-modern Gen Z app
-emotionally warm
-spiritually intelligent
-visually soothing
-
-Inspired by:
-
-meditation apps
-calming journaling apps
-modern AI chat interfaces
-minimalistic spiritual aesthetics
-
-NOT like:
-
-textbook
-religious PDF
-therapy report
-boring chatbot
+Navigate to `http://localhost:3000` to enter the sanctuary.

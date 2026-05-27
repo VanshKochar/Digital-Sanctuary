@@ -36,10 +36,12 @@ export default function Home() {
         {/* Pill Nav */}
         <nav className="hidden md:flex items-center gap-8 bg-white/40 backdrop-blur-md px-8 py-3 rounded-full shadow-sm border border-white/60">
           <Link href="/" className="text-[13px] font-bold tracking-wide text-brand-forest hover:text-brand-forest/70 transition-colors">Home</Link>
-          <Link href="/arjuna" className="text-[13px] font-bold tracking-wide text-brand-forest/70 hover:text-brand-forest transition-colors">Journal</Link>
-          <Link href="/saarthi" className="text-[13px] font-bold tracking-wide text-brand-forest/70 hover:text-brand-forest transition-colors">AI Guide</Link>
-          <Link href="/inner-atlas" className="text-[13px] font-bold tracking-wide text-brand-forest/70 hover:text-brand-forest transition-colors">Insights</Link>
-          <Link href="/" className="text-[13px] font-bold tracking-wide text-brand-forest/70 hover:text-brand-forest transition-colors">About</Link>
+          <Link 
+            href="/purpose"
+            className="text-[13px] font-bold tracking-wide text-brand-forest/70 hover:text-brand-forest transition-colors cursor-pointer"
+          >
+            Purpose of Re.Mind
+          </Link>
         </nav>
 
         {/* Right Actions */}

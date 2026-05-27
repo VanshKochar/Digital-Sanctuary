@@ -8,7 +8,7 @@ router.post('/log', async (req, res) => {
   const {
     sessionId, date, mood,
     emotions, hobbies, relationship, selfCare, health, people,
-    music, weather, steps, exercises, sleep, note, gratitude,
+    music, weather, steps, exercises, sleep, note, gratitude, photos,
     activities // legacy compat
   } = req.body;
 
@@ -35,6 +35,7 @@ router.post('/log', async (req, res) => {
           sleep:        sleep        ?? { bedTime: '', wakeTime: '' },
           note:         note         ?? '',
           gratitude:    gratitude    ?? [],
+          photos:       photos       ?? [],
           activities:   activities   ?? [],
         }
       },

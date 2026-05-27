@@ -31,6 +31,7 @@ const AtlasLogSchema = new mongoose.Schema({
   sleep:        { type: SleepSchema, default: () => ({}) },
   note:         { type: String, default: '' },
   gratitude:    [{ type: String }],
+  photos:       [{ type: String }],
 
   // Legacy field kept for backward compatibility
   activities: [{ type: String }],

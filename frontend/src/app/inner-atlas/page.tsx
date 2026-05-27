@@ -349,12 +349,13 @@ export default function InnerAtlas() {
         exercises: existing.exercises || [],
         sleep: existing.sleep || { bedTime: "", wakeTime: "" },
         note: existing.note || "",
-        gratitude: existing.gratitude?.length === 5 ? existing.gratitude : ["", "", "", "", ""],
+        gratitude: [0, 1, 2, 3, 4].map(i => existing.gratitude?.[i] || ""),
       });
+      setPhotos(existing.photos || []);
     } else {
       setForm(emptyForm());
+      setPhotos([]);
     }
-    setPhotos([]);
     setLogSuccess(false);
     setCheckInDate(dateStr);
     setIsCheckInOpen(true);
@@ -423,6 +424,7 @@ export default function InnerAtlas() {
         sleep: form.sleep,
         note: form.note,
         gratitude: form.gratitude.filter((g) => g.trim()),
+        photos: photos,
         activities: [...form.hobbies, ...form.emotions, ...form.selfCare],
       });
       setLogSuccess(true);
