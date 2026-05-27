@@ -1,29 +1,67 @@
 @import "tailwindcss";
 
+:root {
+  /* Brand color definitions - Light Theme */
+  --brand-forest: #185B46; /* Deep Forest */
+  --brand-sage: #D2DEBF; /* Sage Mist */
+  --brand-peach: #ECD0B6; /* Peach Sand */
+  --brand-ivory: #F2E8C9; /* Ivory Cream */
+  --brand-sky: #E5F1F5; /* Pale Sky Blue */
+
+  /* Theme color mapping */
+  --base-bg: var(--brand-sky);
+  --text-primary: var(--brand-forest);
+  --text-secondary: rgba(24, 91, 70, 0.8);
+  --text-muted: rgba(24, 91, 70, 0.55);
+
+  --brand-blue-deep: var(--brand-forest);
+  --brand-blue-mid: var(--brand-sage);
+  --brand-blue-light: var(--brand-sky);
+  --brand-pink: var(--brand-peach);
+  --brand-yellow: var(--brand-sage);
+  --brand-white: var(--brand-ivory);
+
+  --sacred-blush: var(--brand-peach);
+  --meditation-lavender: var(--brand-sky);
+  --spiritual-gold: var(--brand-ivory);
+}
+
 @theme {
   --font-sans: "Inter", "SF Pro Display", sans-serif;
-  --font-serif: "Cormorant Garamond", serif;
+  --font-serif: "Outfit", "Space Grotesk", sans-serif;
 
-  --color-base-bg: #F8F6F2;
-  --color-lotus-mist: #F4EAE6;
-  --color-sacred-blush: #E7C8C0;
-  --color-meditation-lavender: #DCCFE3;
-  --color-spiritual-gold: #C9A86A;
-  
-  --color-text-primary: #2F2A27;
-  --color-text-secondary: #6B625C;
-  --color-text-muted: #A89F98;
+  --color-base-bg: var(--base-bg);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+
+  --color-brand-forest: var(--brand-forest);
+  --color-brand-sage: var(--brand-sage);
+  --color-brand-peach: var(--brand-peach);
+  --color-brand-ivory: var(--brand-ivory);
+  --color-brand-sky: var(--brand-sky);
+
+  --color-brand-blue-deep: var(--brand-blue-deep);
+  --color-brand-blue-mid: var(--brand-blue-mid);
+  --color-brand-blue-light: var(--brand-blue-light);
+  --color-brand-pink: var(--brand-pink);
+  --color-brand-yellow: var(--brand-yellow);
+  --color-brand-white: var(--brand-white);
+
+  --color-sacred-blush: var(--sacred-blush);
+  --color-meditation-lavender: var(--meditation-lavender);
+  --color-spiritual-gold: var(--spiritual-gold);
 
   --radius-sacred: 24px;
 }
 
 @layer base {
   body {
-    @apply bg-base-bg text-text-primary font-sans antialiased;
-    background-image: radial-gradient(
-      circle at top right,
-      rgba(231, 200, 192, 0.15),
-      transparent 40%
+    @apply text-text-primary font-sans antialiased;
+    background: radial-gradient(
+      circle at top,
+      var(--brand-sky) 0%,
+      var(--brand-sage) 100%
     );
     min-height: 100vh;
   }
@@ -31,11 +69,27 @@
   h1, h2, h3, .font-serif {
     @apply font-serif;
   }
+
+  /* Custom Scrollbar for a premium feel */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(24, 91, 70, 0.2); /* Deep Forest with opacity */
+    border-radius: 10px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(24, 91, 70, 0.4);
+  }
 }
 
 @layer components {
   .glass-card {
-    @apply bg-white/40 backdrop-blur-md border border-white/20 shadow-sm rounded-sacred;
+    @apply bg-white/40 backdrop-blur-xl border border-white/60 shadow-xl rounded-sacred;
   }
 
   .sacred-glow {
@@ -44,13 +98,13 @@
 
   .sacred-glow::after {
     content: '';
-    @apply absolute inset-0 rounded-full blur-3xl -z-10 bg-sacred-blush/20 pointer-events-none;
+    @apply absolute inset-0 rounded-full blur-3xl -z-10 bg-brand-peach/40 pointer-events-none;
   }
 }
 
 /* Custom animations for the 'Alive' feeling */
 @keyframes soft-breathe {
-  0%, 100% { transform: scale(1); opacity: 0.8; }
+  0%, 100% { transform: scale(1); opacity: 0.9; }
   50% { transform: scale(1.02); opacity: 1; }
 }
 
@@ -59,11 +113,39 @@
 }
 
 .floating-particle {
-  @apply fixed pointer-events-none -z-10 opacity-30;
+  @apply fixed pointer-events-none -z-10 opacity-20;
   animation: float 20s linear infinite;
 }
 
 @keyframes float {
   from { transform: translateY(100vh) rotate(0deg); }
   to { transform: translateY(-10vh) rotate(360deg); }
+}
+
+/* 8px Grid Spacing Alignment Rules */
+.grid-gap-8 {
+  gap: 8px;
+}
+.grid-gap-16 {
+  gap: 16px;
+}
+.grid-gap-24 {
+  gap: 24px;
+}
+
+/* Accessibility: Respect preferred-reduced-motion for animations */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-delay: -1ms !important;
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    background-attachment: initial !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0s !important;
+    transition-delay: 0s !important;
+  }
+  .floating-particle,
+  .animate-soft-breathe {
+    animation: none !important;
+  }
 }

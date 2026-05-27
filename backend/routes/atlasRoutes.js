@@ -47,6 +47,30 @@ router.post('/log', async (req, res) => {
   }
 });
 
+// 1.5 Add Meditation Minutes (Auto-sync)
+router.post('/meditation', async (req, res) => {
+  const { sessionId, date, minutes } = req.body;
+  if (!sessionId || !date || typeof minutes !== 'number') {
+    return res.status(400).json({ error: 'sessionId, date, and valid minutes are required' });
+  }
+  
+  try {
+    const updatedLog = await AtlasLog.findOneAndUpdate(
+      { sessionId, date },
+      { 
+        $inc: { meditationMinutes: minutes },
+        // If it creates a new document, satisfy the required mood field
+        $setOnInsert: { mood: "okay" } 
+      },
+      { new: true, upsert: true, runValidators: true }
+    );
+    res.json({ message: 'Meditation minutes logged successfully', log: updatedLog });
+  } catch (error) {
+    console.error('Atlas Add Meditation Error:', error);
+    res.status(500).json({ error: 'Something went wrong while logging meditation.' });
+  }
+});
+
 // 2. Fetch all logs for visual reporting
 router.get('/logs', async (req, res) => {
   const { sessionId } = req.query;

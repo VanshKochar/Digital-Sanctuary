@@ -3,6 +3,7 @@ const router = express.Router();
 const { getArjunaResponse } = require('../services/geminiService');
 
 router.post('/', async (req, res) => {
+  console.log("ARJUNA API ROUTE HIT");
   const { message, history } = req.body;
 
   if (!message) {

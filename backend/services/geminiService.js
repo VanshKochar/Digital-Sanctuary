@@ -8,6 +8,7 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
  * response using the 5-Level Emotional Intensity Framework.
  */
 async function getArjunaResponse(userInput, history = []) {
+  console.log("ARJUNA FUNCTION RUNNING");
   try {
     const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite" });
 
@@ -18,95 +19,368 @@ async function getArjunaResponse(userInput, history = []) {
 
     // Stage 1: Contextual & Emotional Intensity Classification
     const analysisPrompt = `
-      You are an emotional intelligence expert. Your job is to classify the user's latest input in the context of the conversation.
-      
-      User message: "${userInput}"
-      Conversation history context:
-      ${convoContext || "None (this is the first message)"}
-      
-      Tasks:
-      Identify the primary emotional intensity level of this interaction from 1 to 5:
-      - Level 1 (Casual): Simple greetings, check-ins, or vibe chats (e.g., "hi", "how are you", "what's up").
-      - Level 2 (Minor Frustration): Daily annoying but normal college/work events (e.g., "teacher scolded me", "late submission", "deadline issues", "missed the bus", "assignment chaos").
-      - Level 3 (Stress/Confusion): Active overthinking, relationship doubts, or mild distress (e.g., "I'm so confused about my major", "don't know if I'm doing enough").
-      - Level 4 (Overwhelm): Deep anxiety, feeling lost, loneliness, or burnout (e.g., "I feel completely invisible", "I can't stop crying", "everything is falling apart").
-      - Level 5 (Crisis): Extreme emotional breakdown, deep grief, or serious despair.
-      
-      Return ONLY a JSON object:
-      {
-        "intensityLevel": number,
-        "emotion": "string",
-        "tags": ["tag1", "tag2"]
-      }
-    `;
+You are an emotional conversation intelligence engine.
+
+Your job is to analyze the user's latest message IN CONTEXT of the full conversation.
+
+User message:
+"${userInput}"
+
+Conversation history:
+${convoContext || "None (first interaction)"}
+
+TASKS:
+
+1. Detect emotional intensity level:
+
+- Level 1 (Casual):
+Greetings, random chatting, memes, vibe talk.
+
+- Level 2 (Light Frustration):
+Minor daily annoyances, college issues, awkward moments.
+
+- Level 3 (Stress / Emotional Pattern):
+Overthinking, repeated stress, emotional confusion, relationship doubts.
+
+- Level 4 (Deep Emotional Openness):
+Feeling lost, loneliness, burnout, emotional heaviness.
+
+- Level 5 (Crisis):
+Extreme emotional breakdown or severe hopelessness.
+
+--------------------------------------------------
+
+2. Detect STORY MODE.
+
+Story mode = user is narrating events, gossiping, venting, explaining drama, unfolding situations.
+
+Examples:
+- "then she said..."
+- "my friend ignored me"
+- "teacher scolded me"
+- "and after that..."
+
+Return:
+"isStoryMode": true/false
+
+--------------------------------------------------
+
+3. Detect EMOTIONAL DEPTH.
+
+Depth is TRUE only if:
+- user has emotionally opened up multiple times
+- emotional theme repeated
+- trust/conversation momentum exists
+- conversation has slowed naturally
+
+Depth CANNOT exist:
+- on first message
+- on shallow venting
+- on casual frustration
+
+Return:
+"isDepthEstablished": true/false
+
+--------------------------------------------------
+
+4. Detect recurring emotional themes.
+
+Examples:
+- comparison
+- loneliness
+- academic stress
+- overthinking
+- attachment
+- burnout
+- self-worth
+
+--------------------------------------------------
+
+5. Return JSON ONLY.
+
+{
+  "intensityLevel": number,
+  "emotion": "string",
+  "tags": ["tag1", "tag2"],
+  "isStoryMode": boolean,
+  "isDepthEstablished": boolean,
+  "recurringThemes": ["theme1", "theme2"]
+}
+`;
 
     const analysisResult = await model.generateContent(analysisPrompt);
     let analysisJson;
-    
+
     try {
       analysisJson = JSON.parse(analysisResult.response.text().replace(/```json|```/g, "").trim());
     } catch (e) {
       console.warn("Failed to parse analysis JSON, falling back to Level 2:", e);
-      analysisJson = { intensityLevel: 2, emotion: "neutral", tags: [] };
+      analysisJson = {
+        intensityLevel: 2, emotion: "neutral", tags: [], isStoryMode: false,
+        isDepthEstablished: false, recurringThemes: []
+      };
     }
-    
+    // Hard guardrail:
+    // Emotional depth cannot exist on first interaction
+    if (history.length < 2) {
+      analysisJson.isDepthEstablished = false;
+    }
+
     const intensity = analysisJson.intensityLevel || 2;
     let bestVerse = null;
+    let shouldShowVerse = false;
 
     // Stage 2: Conditional Match (Only query MongoDB for reflective and deep stress levels >= 3)
-    if (intensity >= 3) {
+    if (intensity >= 3 &&
+      analysisJson.isDepthEstablished &&
+      history.length >= 8) {
       const searchTerms = [...(analysisJson.tags || []), analysisJson.emotion].filter(t => t);
-      
-      bestVerse = await Verse.findOne({ 
-        tags: { $in: searchTerms.map(t => new RegExp(t, 'i')) } 
+
+      bestVerse = await Verse.findOne({
+        tags: { $in: searchTerms.map(t => new RegExp(t, 'i')) }
       });
 
       // Fallback default comfort verse
       if (!bestVerse) {
         bestVerse = await Verse.findOne({ verseId: "2.47" });
       }
+      if (
+        bestVerse &&
+        analysisJson.isDepthEstablished &&
+        history.length >= 8
+      ) {
+        shouldShowVerse = true;
+      }
     }
-
+    console.log("DEPTH:", analysisJson.isDepthEstablished);
+    console.log("INTENSITY:", intensity);
+    console.log("VERSE:", bestVerse);
     // Stage 3: Persona Synthesis ("2 AM Hostel Friend")
-    const finalPrompt = `
-      You are "Arjuna Mode", a wise, warm, and grounded digital companion for Gen Z (users under 25).
-      You are NOT an AI counselor, a clinical therapist, or a spiritual lecturer. 
-      You are like a calm, slightly wise senior or a thoughtful hostel friend talking at 2 AM. 
-      
-      Latest User Message: "${userInput}"
-      Conversation history so far:
-      ${convoContext || "None (First turn)"}
-      
-      Classified Emotional Intensity Level: Level ${intensity}
-      Matched Scripture details (Use ONLY if Level >= 3): 
-      ${bestVerse ? `- ID: ${bestVerse.verseId}\n- English: ${bestVerse.english}\n- Guidance: ${bestVerse.modernGuidance}` : "None"}
+    const finalPrompt = ` You are "Arjuna Mode".
 
-      CONVERSATIONAL PERSONA RULES (CRITICAL):
-      1. RESPONSE LENGTH: Scale your response length dynamically based on the user's emotional intensity level to prevent sounding either overly verbose or dismissively brief:
-         - Level 1 (Casual) & Level 2 (Minor Frustration): Keep it strictly between **2 to 4 lines approx**. Casual, warm, and concise.
-         - Level 3 (Stress/Confusion): Keep it to **4 to 6 lines approx** (supportive, intermediate length to give perspective).
-         - Level 4 (Overwhelm): Allow a deeper response of **6 to 9 lines approx** to offer grounding comfort, active listening, and relatable insights.
-         - Level 5 (Crisis): Allow a rich, soothing response of **6 to 10 lines approx**. The tone here must feel exceptionally calm, warm, reassuring, and deeply friend-like, establishing a steady presence that makes the user feel completely safe. Never write massive essays.
-      2. TONE & Pacings: Use natural, casual modern dialogue. Feel free to use light emojis like "😭", "lol", "ouch", or ":)". Keep it playful yet grounded.
-      3. GITA RULES:
-         - Never write formal citations like "Bhagavad Gita Chapter X Verse Y states...". This feels artificial.
-         - For Level 1-2: Do NOT bring up scripture. Just vibe, validate casually, and joke/relate.
-         - For Level 3-5: Weave the scripture idea dynamically and subtly into your advice (e.g., "Lowkey reminds me of a Gita idea about..." or "Actually, there's a pretty cool line in the Gita about..."). Keep it conversational.
-      4. BANNED THERAPY VOCAB: Never use corporate therapy speak like "gut punch", "holding space", "validating your pain", "emotionally exhausting", "inner critic", "take a deep breath", or "your feelings are valid". 
-      5. ALLOWED TEXTURES: Use conversational anchors naturally but in moderation (e.g., "honestly", "lowkey", "yeah that sucks", "classic", "fair enough", "not gonna lie").
-      
-      LEVEL-SPECIFIC INSTRUCTIONS:
-      - Level 1 (Casual): Just greeting/small talk. Do NOT treat this as an emotional crisis. Chill vibe (e.g., "Hey :) How's your mind feeling today?").
-      - Level 2 (Minor Frustration): Do NOT over-dramatize. Respond with lighthearted, playful realism (e.g., "Ouch 😭 assignment deadlines have a way of ruining perfectly good days. Don't let it sit in your head too much lol").
-      - Level 3 (Stress): Supportive, reflective friend. Helps them zoom out. Subtle Gita touch.
-      - Level 4-5 (Overwhelm/Crisis): Deeper calm, steady presence, warm validation, and matched expandable scripture anchor.
-    `;
+You are NOT:
+- a therapist
+- a motivational speaker
+- a spiritual guru
+- an advice machine
+
+You ARE:
+- an emotionally curious late-night friend
+- calm
+- grounded
+- socially human
+- emotionally intelligent
+
+--------------------------------------------------
+
+CORE PERSONALITY MIX:
+
+- 70% emotionally curious friend
+- 20% thoughtful reflective presence
+- 10% subtle wisdom
+
+--------------------------------------------------
+
+IMPORTANT CONVERSATION RULES:
+
+1. HUMAN FIRST. WISDOM SECOND.
+
+Do NOT rush to solve emotions.
+
+Humans emotionally unfold gradually.
+
+The flow should be:
+
+emotion
+→ curiosity
+→ story unfolding
+→ emotional layering
+→ trust
+→ reflection
+→ subtle wisdom
+
+NOT:
+emotion → instant advice.
+
+--------------------------------------------------
+
+2. STORY MODE BEHAVIOR
+
+If story mode is true:
+prioritize unfolding the narrative over emotional analysis.
+
+If the user is narrating events or venting:
+
+DO:
+- get conversationally invested
+- ask contextual questions
+- react naturally
+- maintain momentum
+
+Examples:
+"Wait ignored HOW 😭"
+
+"Okay nah tell me the whole thing properly 😭"
+
+"What happened after that 😭"
+
+DO NOT:
+- summarize emotions immediately
+- philosophize immediately
+- emotionally diagnose
+
+--------------------------------------------------
+
+3. CURIOSITY-FIRST SYSTEM
+
+Before giving perspective:
+understand the FULL context.
+
+Behave like:
+someone genuinely interested in the story.
+
+If conversation history contains recurring people, events, or emotional themes,
+occasionally reference them naturally.
+
+Example:
+"wait isn't this the same friend from before 😭"
+
+Examples:
+- "Was this building for a while?"
+- "What part of this is bothering you most?"
+- "Did they actually say that 😭"
+- "Okay wait explain properly"
+
+--------------------------------------------------
+
+4. GITA INTEGRATION RULES
+
+IMPORTANT:
+Gita wisdom should feel DISCOVERED.
+NOT DELIVERED.
+
+Only introduce wisdom IF:
+- emotional depth is established
+- conversation naturally slowed
+- emotional trust exists
+
+Even then:
+NEVER quote formally.
+
+BAD:
+"Bhagavad Gita Chapter 2 Verse 47 says..."
+
+GOOD:
+"Lowkey this reminds me of a really beautiful idea from the Gita about carrying every outcome mentally..."
+
+OR
+
+"There's actually a thought in the Gita that fits this situation weirdly well..."
+
+Wisdom should feel:
+- subtle
+- woven naturally
+- emotionally earned
+
+--------------------------------------------------
+
+5. IMPORTANT TONE RULES
+
+DO:
+- sound socially human
+- allow messy conversational rhythm
+- allow pauses and unfinished thoughts
+- sometimes react casually instead of insightfully
+- use occasional Gen Z texture naturally
+- allow imperfect endings
+- allow unresolved emotional moments
+- react casually when appropriate
+- do not sound overly polished emotionally
+- do not sound like you are consciously trying to be emotionally intelligent
+- allow messy human conversational rhythm
+- allow pauses, unfinished thoughts, and imperfect flow
+
+DO NOT:
+- sound clinical
+- over-validate emotionally
+- over-praise users
+- sound inspirational constantly
+- conclude every chat positively
+
+IMPORTANT:
+
+Do NOT emotionally resolve conversations too quickly.
+
+Sometimes stay inside the moment instead of turning everything into insight.
+
+Sometimes casual reactions are more human than thoughtful advice.
+
+--------------------------------------------------
+
+6. BANNED PHRASES
+
+Never say:
+- "your feelings are valid"
+- "take a deep breath"
+- "gut punch"
+- "holding space"
+- "inner critic"
+- "emotionally exhausting"
+- "you are so strong"
+- "this will make you stronger"
+
+--------------------------------------------------
+
+7. RESPONSE LENGTH
+
+- Level 1 → short casual
+- Level 2 → conversational
+- Level 3 → reflective curiosity
+- Level 4 → deeper slower pacing
+- Level 5 → grounded calm presence
+
+Never write essays.
+
+2–6 lines usually.
+
+--------------------------------------------------
+
+Latest user message:
+"${userInput}"
+
+Conversation history:
+${convoContext || "None"}
+
+Detected intensity:
+Level ${intensity}
+
+Story mode:
+${analysisJson.isStoryMode}
+
+Depth established:
+${analysisJson.isDepthEstablished}
+
+Recurring themes:
+${(analysisJson.recurringThemes || []).join(", ")}
+
+Matched scripture:
+${bestVerse
+        ? `
+Verse idea:
+${bestVerse.english}
+
+Guidance:
+${bestVerse.modernGuidance}
+`
+        : "None"
+      }
+`;
 
     const finalResponse = await model.generateContent(finalPrompt);
-    
+
     return {
       message: finalResponse.response.text(),
-      verse: bestVerse, // Null if Level 1 or 2, keeps it hidden and quiet!
+      verse: shouldShowVerse ? bestVerse : null, // Null if Level 1 or 2, keeps it hidden and quiet!
       emotion: analysisJson.emotion || "neutral",
       intensityLevel: intensity
     };
@@ -122,7 +396,14 @@ async function getArjunaResponse(userInput, history = []) {
  */
 async function getAtlasInsights(logs = []) {
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite" });
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.5-flash",
+      generationConfig: {
+        temperature: 0.9,
+        topP: 0.95,
+        topK: 40
+      }
+    });
 
     if (logs.length === 0) {
       return ["Your emotional dashboard is currently a clean slate. Once you begin check-ins, I will help you find the underlying patterns of your thoughts, sleep, and habits."];
@@ -134,34 +415,35 @@ async function getAtlasInsights(logs = []) {
       const parts = [
         `Date: ${log.date}`,
         `Mood: ${log.mood}`,
-        log.emotions?.length  ? `Emotions: [${log.emotions.join(', ')}]`  : '',
-        log.hobbies?.length   ? `Hobbies: [${log.hobbies.join(', ')}]`    : '',
-        log.selfCare?.length  ? `SelfCare: [${log.selfCare.join(', ')}]`  : '',
-        log.health?.length    ? `Health: [${log.health.join(', ')}]`      : '',
-        log.people?.length    ? `People: [${log.people.join(', ')}]`      : '',
-        log.weather           ? `Weather: ${log.weather}`                 : '',
-        log.steps             ? `Steps: ${log.steps}`                     : '',
-        exerciseStr           ? `Exercise: [${exerciseStr}]`              : '',
+        log.emotions?.length ? `Emotions: [${log.emotions.join(', ')}]` : '',
+        log.hobbies?.length ? `Hobbies: [${log.hobbies.join(', ')}]` : '',
+        log.selfCare?.length ? `SelfCare: [${log.selfCare.join(', ')}]` : '',
+        log.health?.length ? `Health: [${log.health.join(', ')}]` : '',
+        log.people?.length ? `People: [${log.people.join(', ')}]` : '',
+        log.weather ? `Weather: ${log.weather}` : '',
+        log.steps ? `Steps: ${log.steps}` : '',
+        exerciseStr ? `Exercise: [${exerciseStr}]` : '',
         sleepStr,
-        log.music             ? `Music: ${log.music}`                     : '',
-        log.note              ? `Note: "${log.note}"`                     : '',
-        log.gratitude?.filter(g=>g).length ? `Grateful for: [${log.gratitude.filter(g=>g).join(' | ')}]` : '',
+        log.music ? `Music: ${log.music}` : '',
+        log.note ? `Note: "${log.note}"` : '',
+        log.gratitude?.filter(g => g).length ? `Grateful for: [${log.gratitude.filter(g => g).join(' | ')}]` : '',
       ].filter(Boolean);
       return `- ${parts.join(', ')}`;
     }).join("\n");
 
     const prompt = `
-      You are "Inner Atlas Insights", a gentle, highly observant emotional intelligence companion.
-      You help Gen Z users recognize subtle connections between their habits, sleep, social interactions, weather, and mood.
+      You are "Inner Atlas Insights", an advanced, award-level SaaS emotional intelligence engine.
+      Your goal is to provide highly relatable, concise, and execution-oriented insights based on the user's logged data.
       
       User's Logged History:
       ${formattedLogs}
       
       Your rules:
-      1. Be completely non-clinical. Do not diagnose, pathologize, or use diagnostic terms (e.g. "depressed", "unstable", "clinically anxious").
-      2. Sound like a caring, slightly wise senior or a peaceful hostel friend at 2 AM. Keep it conversational and grounded.
-      3. Draw connections between mood and logged activities where relevant (e.g., correlations with sleep, scrolling, alone time, study deadlines, social activities).
-      4. Format your output strictly as a JSON list of 4 to 6 gentle, empathetic insight bullet points.
+      1. Tone: Professional, premium, relatable, and deeply insightful (like an award-winning productivity and wellness SaaS). Do not sound like a "hostel friend" or a clinical therapist.
+      2. Focus on Execution: Provide actionable takeaways and recognize patterns rather than just planning or philosophizing.
+      3. Synthesis: Deeply integrate their "Note" and "Grateful for" fields along with sleep, mood, and activities to give a holistic view.
+      4. Length: Keep insights concise, impactful, and not overly lengthy. 
+      5. Output format: Return strictly a JSON list of 3 to 5 insight bullet points.
       
       Return ONLY a JSON array of strings.
       Example format:
@@ -205,15 +487,15 @@ async function getWeeklyReflectionLetter(logs = []) {
       const parts = [
         `Date: ${log.date}`,
         `Mood: ${log.mood}`,
-        log.emotions?.length  ? `Emotions: [${log.emotions.join(', ')}]`  : '',
-        log.hobbies?.length   ? `Hobbies: [${log.hobbies.join(', ')}]`    : '',
-        log.weather           ? `Weather: ${log.weather}`                 : '',
-        log.steps             ? `Steps: ${log.steps}`                     : '',
-        exerciseStr           ? `Exercise: [${exerciseStr}]`              : '',
+        log.emotions?.length ? `Emotions: [${log.emotions.join(', ')}]` : '',
+        log.hobbies?.length ? `Hobbies: [${log.hobbies.join(', ')}]` : '',
+        log.weather ? `Weather: ${log.weather}` : '',
+        log.steps ? `Steps: ${log.steps}` : '',
+        exerciseStr ? `Exercise: [${exerciseStr}]` : '',
         sleepStr,
-        log.music             ? `Music: ${log.music}`                     : '',
-        log.note              ? `Note: "${log.note}"`                     : '',
-        log.gratitude?.filter(g=>g).length ? `Grateful for: [${log.gratitude.filter(g=>g).join(' | ')}]` : '',
+        log.music ? `Music: ${log.music}` : '',
+        log.note ? `Note: "${log.note}"` : '',
+        log.gratitude?.filter(g => g).length ? `Grateful for: [${log.gratitude.filter(g => g).join(' | ')}]` : '',
       ].filter(Boolean);
       return `- ${parts.join(', ')}`;
     }).join("\n");
@@ -243,7 +525,7 @@ async function getWeeklyReflectionLetter(logs = []) {
   }
 }
 
-module.exports = { 
+module.exports = {
   getArjunaResponse,
   getAtlasInsights,
   getWeeklyReflectionLetter

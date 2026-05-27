@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Cormorant_Garamond } from "next/font/google";
+import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({
@@ -7,15 +7,14 @@ const inter = Inter({
   variable: "--font-inter",
 });
 
-const cormorant = Cormorant_Garamond({
+const outfit = Outfit({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  variable: "--font-cormorant",
+  variable: "--font-outfit",
 });
 
 export const metadata: Metadata = {
-  title: "Arjuna Mode | Digital Sanctuary",
-  description: "Ancient wisdom for modern emotions. A digital sanctuary for the restless mind.",
+  title: "Re.Mind | Digital Sanctuary",
+  description: "Your emotional wellness sanctuary. Explore Arjuna Mode, Saarthi AI, and Inner Atlas.",
 };
 
 export default function RootLayout({
@@ -25,7 +24,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${cormorant.variable} antialiased`}>
+      <body className={`${inter.variable} ${outfit.variable} antialiased`}>
         {children}
       </body>
     </html>

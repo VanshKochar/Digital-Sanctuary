@@ -34,6 +34,9 @@ const AtlasLogSchema = new mongoose.Schema({
 
   // Legacy field kept for backward compatibility
   activities: [{ type: String }],
+  
+  // New field for sanctuary meditation
+  meditationMinutes: { type: Number, default: 0 },
 
 }, { timestamps: true });
 

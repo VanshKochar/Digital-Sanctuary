@@ -26,7 +26,7 @@ interface ChatInterfaceProps {
   setActiveSessionId: (id: string | null) => void;
 }
 
-// Minimal Premium Copy Button appearing on hover
+/* ── Copy Button ── */
 function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
 
@@ -44,7 +44,7 @@ function CopyButton({ text }: { text: string }) {
     <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
       <button
         onClick={handleCopy}
-        className="p-1.5 rounded-lg bg-white/70 hover:bg-white border border-white/50 shadow-sm text-text-secondary hover:text-text-primary transition-all duration-255 focus:outline-none flex items-center gap-1.5 cursor-pointer active:scale-95"
+        className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 border border-white/15 shadow-sm text-text-muted hover:text-white transition-all duration-200 focus:outline-none flex items-center gap-1.5 cursor-pointer active:scale-95"
         title="Copy response"
       >
         <AnimatePresence mode="wait">
@@ -56,8 +56,8 @@ function CopyButton({ text }: { text: string }) {
               exit={{ scale: 0.8, opacity: 0 }}
               className="flex items-center gap-1"
             >
-              <Check className="w-3.5 h-3.5 text-emerald-500" />
-              <span className="text-[10px] font-sans font-semibold text-emerald-600 pr-0.5">Copied!</span>
+              <Check className="w-3.5 h-3.5 text-emerald-400" />
+              <span className="text-[10px] font-sans font-semibold text-emerald-400 pr-0.5">Copied!</span>
             </motion.div>
           ) : (
             <motion.div
@@ -67,7 +67,7 @@ function CopyButton({ text }: { text: string }) {
               exit={{ scale: 0.8, opacity: 0 }}
               className="flex items-center"
             >
-              <Copy className="w-3.5 h-3.5 text-sacred-blush hover:text-text-primary transition-colors" />
+              <Copy className="w-3.5 h-3.5 text-brand-yellow" />
             </motion.div>
           )}
         </AnimatePresence>
@@ -76,24 +76,24 @@ function CopyButton({ text }: { text: string }) {
   );
 }
 
-// Premium Expandable Scripture Discloser for Hidden Depth Vibe
+/* ── Verse Disclosure ── */
 function VerseDisclosure({ verse }: { verse: Verse }) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="mt-4 pt-4 border-t border-sacred-blush/20">
+    <div className="mt-4 pt-4 border-t border-white/10">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between text-left text-xs font-semibold tracking-wider text-spiritual-gold hover:text-text-primary transition-colors focus:outline-none py-1.5 cursor-pointer"
+        className="w-full flex items-center justify-between text-left text-xs font-semibold tracking-wider text-brand-yellow hover:text-white transition-colors focus:outline-none py-1.5 cursor-pointer"
       >
-        <span className="flex items-center gap-1.5 font-serif italic text-spiritual-gold">
+        <span className="flex items-center gap-1.5 font-serif italic text-brand-yellow">
           📖 Reflect on Verse {verse.verseId}
         </span>
         <span className="text-[9px] font-sans text-text-muted uppercase tracking-wider">
           {isOpen ? "[ Hide Scripture ]" : "[ Reveal Scripture ]"}
         </span>
       </button>
-      
+
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -101,18 +101,18 @@ function VerseDisclosure({ verse }: { verse: Verse }) {
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3 }}
-            className="overflow-hidden space-y-3 mt-3 bg-white/30 backdrop-blur-md p-4 rounded-sacred border border-white/20 italic"
+            className="overflow-hidden space-y-3 mt-3 bg-brand-ivory/50 backdrop-blur-md p-4 rounded-2xl border border-brand-peach italic"
           >
-            <p className="text-base text-text-primary font-serif leading-relaxed text-center py-2 select-text">
+            <p className="text-base text-brand-forest font-serif leading-relaxed text-center py-2 select-text">
               {verse.sanskrit}
             </p>
             {verse.hindi && (
-              <div className="text-xs text-text-secondary leading-relaxed border-t border-white/20 pt-2 select-text">
+              <div className="text-xs text-text-secondary leading-relaxed border-t border-white/10 pt-2 select-text">
                 <span className="font-sans font-bold tracking-widest text-[9px] uppercase text-text-muted block mb-1">Hindi</span>
                 {verse.hindi}
               </div>
             )}
-            <div className="text-xs text-text-secondary leading-relaxed border-t border-white/20 pt-2 select-text">
+            <div className="text-xs text-text-secondary leading-relaxed border-t border-white/10 pt-2 select-text">
               <span className="font-sans font-bold tracking-widest text-[9px] uppercase text-text-muted block mb-1">English</span>
               {verse.english}
             </div>
@@ -123,6 +123,7 @@ function VerseDisclosure({ verse }: { verse: Verse }) {
   );
 }
 
+/* ── Main Chat Interface ── */
 export default function ChatInterface({
   messages,
   setMessages,
@@ -134,7 +135,7 @@ export default function ChatInterface({
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Auto-grow textarea height dynamically based on input length
+  // Auto-grow textarea
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
@@ -158,27 +159,14 @@ export default function ChatInterface({
       const title = firstUserMsg.length > 60 ? firstUserMsg.substring(0, 57) + "..." : firstUserMsg;
 
       const existingIndex = history.findIndex((s: LocalChatSession) => s.id === id);
+      const session: LocalChatSession = { id, title, messages: msgs, timestamp: Date.now() };
 
-      const session: LocalChatSession = {
-        id,
-        title,
-        messages: msgs,
-        timestamp: Date.now(),
-      };
+      if (existingIndex > -1) { history[existingIndex] = session; } else { history = [session, ...history]; }
 
-      if (existingIndex > -1) {
-        history[existingIndex] = session;
-      } else {
-        history = [session, ...history];
-      }
-
-      // Sort by timestamp desc and cap at 2
       history.sort((a: LocalChatSession, b: LocalChatSession) => b.timestamp - a.timestamp);
       history = history.slice(0, 2);
 
       localStorage.setItem("arjuna_history", JSON.stringify(history));
-
-      // Trigger custom event so sidebar updates instantly
       window.dispatchEvent(new Event("historyUpdated"));
     } catch (e) {
       console.error("Failed to save chat session history:", e);
@@ -194,27 +182,27 @@ export default function ChatInterface({
     setInput("");
     setLoading(true);
 
-    // Reset textarea height
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
-    }
+    if (textareaRef.current) { textareaRef.current.style.height = "auto"; }
 
-    // Get or create session ID
     let sessionId = activeSessionId;
     if (!sessionId) {
       sessionId = Date.now().toString();
       setActiveSessionId(sessionId);
     }
 
-    // Save intermediate history
     saveChatSession(sessionId, updatedMessages);
 
     try {
-      // Pass the conversation history so Gemini is context-aware (Delayed Injection)
-      const response = await axios.post("https://digital-sanctuary-ou9k.onrender.com/api/chat", {
+      const isLocal = typeof window !== "undefined" && window.location.hostname === "localhost";
+      const baseUrl = isLocal
+        ? "http://localhost:5000/api/chat"
+        : "https://digital-sanctuary-ou9k.onrender.com/api/chat";
+
+      const response = await axios.post(baseUrl, {
         message: input,
         history: messages,
       });
+
 
       const arjunaMessage: Message = {
         role: "arjuna",
@@ -239,29 +227,23 @@ export default function ChatInterface({
     }
   };
 
-  // Smart Enter Key Handling (Enter sends, Shift+Enter adds newline)
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
   };
 
-  // Smooth scroll logic to latest message bubbles
   useEffect(() => {
     if (scrollRef.current) {
-      scrollRef.current.scrollTo({
-        top: scrollRef.current.scrollHeight,
-        behavior: "smooth",
-      });
+      scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
     }
   }, [messages]);
 
   return (
-    <div className="flex flex-col h-[74vh] w-full max-w-3xl mx-auto glass-card p-6 md:p-8 overflow-hidden transition-all duration-500 shadow-md hover:shadow-lg">
+    <div className="flex flex-col h-[74vh] w-full max-w-3xl mx-auto glass-card p-6 md:p-8 overflow-hidden transition-all duration-500">
+      {/* Messages area */}
       <div
         ref={scrollRef}
-        className="flex-1 overflow-y-auto space-y-6 md:space-y-8 pr-2 scrollbar-hide scroll-smooth"
+        className="flex-1 overflow-y-auto space-y-6 md:space-y-8 pr-2 scroll-smooth"
+        style={{ scrollbarWidth: "none" }}
       >
         <AnimatePresence>
           {messages.length === 0 && (
@@ -270,8 +252,10 @@ export default function ChatInterface({
               animate={{ opacity: 1 }}
               className="text-center py-16 space-y-4"
             >
-              <h2 className="text-3xl md:text-4xl font-serif text-text-secondary italic leading-snug">&quot;How is your mind feeling today?&quot;</h2>
-              <p className="text-text-muted text-sm md:text-base">Share your thoughts, and Arjuna will guide you.</p>
+              <h2 className="text-3xl md:text-4xl font-serif text-brand-forest italic leading-snug">
+                &quot;How is your mind feeling today?&quot;
+              </h2>
+              <p className="text-brand-forest/70 text-sm md:text-base">Share your thoughts, and Arjuna will guide you.</p>
             </motion.div>
           )}
 
@@ -283,25 +267,19 @@ export default function ChatInterface({
               transition={{ type: "spring", stiffness: 120, damping: 18, mass: 0.9 }}
               className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
             >
-              {/* Spacious, premium message bubbles capped for superior reading rhythm */}
               <div
-                className={`relative group max-w-[75%] md:max-w-[80%] p-5 md:p-6 rounded-sacred select-text border transition-all duration-300 hover:shadow-sm ${
-                  msg.role === "user"
-                    ? "bg-sacred-blush/30 text-text-primary border-sacred-blush/20 hover:bg-sacred-blush/35"
-                    : "bg-white/60 text-text-secondary border-white/40 shadow-sm hover:bg-white/70"
-                }`}
+                className={`relative group max-w-[75%] md:max-w-[80%] p-5 md:p-6 rounded-[20px] select-text border transition-all duration-300 ${msg.role === "user"
+                  ? "bg-brand-forest text-brand-ivory border-brand-forest/80 shadow-md"
+                  : "bg-brand-ivory/80 text-brand-forest border-brand-peach shadow-sm"
+                  }`}
               >
-                {msg.role === "arjuna" && (
-                  <CopyButton text={msg.content} />
-                )}
+                {msg.role === "arjuna" && <CopyButton text={msg.content} />}
 
                 <p className="leading-relaxed whitespace-pre-wrap select-text text-sm md:text-base pr-4">
                   {msg.content}
                 </p>
 
-                {msg.verse && (
-                  <VerseDisclosure verse={msg.verse} />
-                )}
+                {msg.verse && <VerseDisclosure verse={msg.verse} />}
               </div>
             </motion.div>
           ))}
@@ -313,16 +291,23 @@ export default function ChatInterface({
               transition={{ duration: 0.4 }}
               className="flex justify-start"
             >
-              <div className="bg-white/60 p-5 rounded-sacred animate-soft-breathe">
-                <Leaf className="w-5 h-5 text-sacred-blush animate-spin-slow" />
+              <div className="bg-brand-ivory/80 border border-brand-peach px-5 py-4 rounded-[20px] flex gap-1.5 shadow-sm">
+                {[0, 1, 2].map((i) => (
+                  <motion.div
+                    key={i}
+                    animate={{ y: [0, -6, 0] }}
+                    transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.15, ease: "easeInOut" }}
+                    className="w-2 h-2 rounded-full bg-brand-forest/60"
+                  />
+                ))}
               </div>
             </motion.div>
           )}
         </AnimatePresence>
       </div>
 
-      {/* Input container upgraded to auto-expanding premium area */}
-      <div className="mt-6 relative flex items-end gap-3 bg-white/60 border border-white/70 rounded-sacred py-3.5 px-5.5 focus-within:ring-2 focus-within:ring-sacred-blush/30 focus-within:border-white/90 shadow-sm transition-all duration-300">
+      {/* Input area */}
+      <div className="mt-6 relative flex items-end gap-3 bg-brand-ivory border border-brand-peach/60 rounded-2xl py-3.5 px-5 focus-within:ring-2 focus-within:ring-brand-forest/30 focus-within:border-brand-peach transition-all duration-300 shadow-sm">
         <textarea
           ref={textareaRef}
           rows={1}
@@ -330,17 +315,16 @@ export default function ChatInterface({
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Share your heart..."
-          className="flex-1 bg-transparent border-0 outline-none resize-none overflow-y-auto max-h-48 placeholder:text-text-muted text-sm md:text-base text-text-primary leading-relaxed py-1 scrollbar-hide focus:ring-0 focus:outline-none"
-          style={{ minHeight: "26px" }}
+          className="flex-1 bg-transparent border-0 outline-none resize-none overflow-y-auto max-h-48 placeholder:text-brand-forest/40 text-sm md:text-base text-brand-forest leading-relaxed py-1 focus:ring-0 focus:outline-none"
+          style={{ minHeight: "26px", scrollbarWidth: "none" }}
         />
         <button
           onClick={sendMessage}
           disabled={loading || !input.trim()}
-          className={`p-2.5 rounded-full transition-all duration-300 flex-shrink-0 mb-0.5 flex items-center justify-center ${
-            loading || !input.trim()
-              ? "bg-black/[0.03] text-text-muted/65 cursor-not-allowed"
-              : "bg-sacred-blush text-white shadow-md shadow-sacred-blush/25 hover:bg-sacred-blush/90 hover:scale-105 hover:shadow-lg active:scale-95 cursor-pointer"
-          }`}
+          className={`p-2.5 rounded-full transition-all duration-300 flex-shrink-0 mb-0.5 flex items-center justify-center ${loading || !input.trim()
+            ? "bg-brand-forest/10 text-brand-forest/30 cursor-not-allowed"
+            : "bg-brand-forest text-brand-ivory shadow-md hover:bg-brand-forest/90 hover:scale-105 hover:shadow-lg active:scale-95 cursor-pointer"
+            }`}
           aria-label="Send message"
         >
           <Send className="w-4 h-4" />
