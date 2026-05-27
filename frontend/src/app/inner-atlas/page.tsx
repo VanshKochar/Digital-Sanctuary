@@ -48,6 +48,7 @@ interface AtlasLog {
   sleep: SleepData;
   note: string;
   gratitude: string[];
+  photos?: string[];
   activities?: string[];
   createdAt?: string;
 }
@@ -1231,7 +1232,7 @@ export default function InnerAtlas() {
 
                 {/* 13 ── TODAY'S NOTE */}
                 <section>
-                  <label htmlFor="todays-note" className="text-[10px] font-bold uppercase tracking-widest text-text-muted mb-2.5 flex items-center gap-1.5 block">
+                  <label htmlFor="todays-note" className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-2.5 flex items-center gap-1.5 block">
                     <BookOpen className="w-3.5 h-3.5" /> Today&apos;s Note
                   </label>
                   <textarea
@@ -1240,15 +1241,15 @@ export default function InnerAtlas() {
                     onChange={(e) => setForm((p) => ({ ...p, note: e.target.value }))}
                     rows={3}
                     placeholder="Write anything... what happened, how you felt, what you noticed..."
-                    className="w-full px-4 py-3 rounded-sacred bg-white/50 border border-white/60 text-sm text-text-primary placeholder:text-text-muted/60 focus:outline-none focus:ring-2 focus:ring-sacred-blush/40 transition-all resize-none"
+                    className="w-full px-4 py-3 rounded-2xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-brand-peach/40 transition-all resize-none"
                   />
                 </section>
 
                 {/* 14 ── PHOTOS */}
                 <section>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted mb-3 flex items-center gap-1.5">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-3 flex items-center gap-1.5">
                     <Camera className="w-3.5 h-3.5" /> Today&apos;s Photos
-                    <span className="text-text-muted/50 normal-case font-normal tracking-normal">(max 2)</span>
+                    <span className="text-white/30 normal-case font-normal tracking-normal">(max 2)</span>
                   </p>
                   <div className="flex gap-3 flex-wrap">
                     {photos.map((photo, i) => (
@@ -1269,11 +1270,11 @@ export default function InnerAtlas() {
                       <button
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
-                        className="w-28 h-28 rounded-2xl border-2 border-dashed border-sacred-blush/40 flex flex-col items-center justify-center gap-2 text-text-muted hover:bg-white/50 hover:border-sacred-blush transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-sacred-blush/40"
+                        className="w-28 h-28 rounded-2xl border-2 border-dashed border-white/20 flex flex-col items-center justify-center gap-2 text-white/40 hover:bg-white/5 hover:border-white/40 transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand-peach/40"
                         aria-label="Add photo"
                       >
-                        <Camera className="w-6 h-6 text-sacred-blush/50" />
-                        <span className="text-[9px] tracking-wide">Add Photo</span>
+                        <Camera className="w-6 h-6 text-white/30" />
+                        <span className="text-[9px] tracking-wide text-white/50">Add Photo</span>
                       </button>
                     )}
                     <input
@@ -1290,14 +1291,14 @@ export default function InnerAtlas() {
 
                 {/* 15 ── GRATITUDE JOURNAL */}
                 <section>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted mb-1.5 flex items-center gap-1.5">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-1.5 flex items-center gap-1.5">
                     🙏 Gratitude Journal
                   </p>
-                  <p className="text-[10px] text-text-muted italic mb-3">5 things that happened today you&apos;re thankful for...</p>
+                  <p className="text-[10px] text-white/30 italic mb-3">5 things that happened today you&apos;re thankful for...</p>
                   <div className="space-y-2.5">
                     {form.gratitude.map((g, i) => (
                       <div key={i} className="flex items-center gap-3">
-                        <span className="w-5 h-5 rounded-full bg-sacred-blush/20 text-sacred-blush text-[10px] font-bold flex items-center justify-center shrink-0" aria-hidden="true">
+                        <span className="w-5 h-5 rounded-full bg-white/10 text-white/70 text-[10px] font-bold flex items-center justify-center shrink-0" aria-hidden="true">
                           {i + 1}
                         </span>
                         <input
@@ -1310,7 +1311,7 @@ export default function InnerAtlas() {
                           }}
                           placeholder="I'm grateful for..."
                           aria-label={`Gratitude ${i + 1}`}
-                          className="flex-1 px-3 py-2 rounded-xl bg-white/50 border border-white/60 text-xs text-text-primary placeholder:text-text-muted/50 focus:outline-none focus:ring-2 focus:ring-sacred-blush/30 transition-all"
+                          className="flex-1 px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-xs text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-brand-peach/40 transition-all"
                         />
                       </div>
                     ))}
@@ -1318,16 +1319,16 @@ export default function InnerAtlas() {
                 </section>
 
                 {/* ── SUBMIT ── */}
-                <div className="pt-4 border-t border-sacred-blush/20">
+                <div className="pt-4 border-t border-white/10">
                   <motion.button
                     type="button"
                     onClick={handleSubmit}
                     disabled={isSubmitting || !form.mood}
                     whileHover={!prefersReducedMotion && !isSubmitting && form.mood ? { scale: 1.02 } : {}}
                     whileTap={!prefersReducedMotion ? { scale: 0.98 } : {}}
-                    className={`w-full py-4 rounded-sacred text-sm font-bold tracking-widest uppercase shadow-lg transition-all cursor-pointer disabled:cursor-not-allowed flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-sacred-blush/40 ${logSuccess
-                      ? "bg-emerald-400 text-white"
-                      : "bg-text-primary text-base-bg hover:opacity-90 disabled:opacity-40"
+                    className={`w-full py-4 rounded-2xl text-sm font-bold tracking-widest uppercase shadow-lg transition-all cursor-pointer disabled:cursor-not-allowed flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-brand-peach/40 ${logSuccess
+                      ? "bg-brand-sage text-brand-forest"
+                      : "bg-brand-peach text-brand-forest hover:opacity-90 disabled:opacity-40 disabled:bg-white/10 disabled:text-white/40"
                       }`}
                     aria-label="Save today's journal entry"
                   >
@@ -1336,11 +1337,11 @@ export default function InnerAtlas() {
                     ) : logSuccess ? (
                       <><Check className="w-5 h-5" /> Journal Done! 🐾</>
                     ) : (
-                      <><Sparkles className="w-4 h-4 text-sacred-blush" /> Seal Today&apos;s Entry</>
+                      <><Sparkles className="w-4 h-4 text-brand-forest/60" /> Seal Today&apos;s Entry</>
                     )}
                   </motion.button>
                   {!form.mood && (
-                    <p className="text-center text-[10px] text-text-muted mt-2 italic">Choose your mood kitten to seal the entry 🐾</p>
+                    <p className="text-center text-[10px] text-white/30 mt-2 italic">Choose your mood kitten to seal the entry 🐾</p>
                   )}
                 </div>
 
