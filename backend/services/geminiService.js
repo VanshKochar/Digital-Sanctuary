@@ -443,30 +443,39 @@ async function getAtlasInsights(logs = []) {
       2. Focus on Execution: Provide actionable takeaways and recognize patterns rather than just planning or philosophizing.
       3. Synthesis: Deeply integrate their "Note" and "Grateful for" fields along with sleep, mood, and activities to give a holistic view.
       4. Length: Keep insights concise, impactful, and not overly lengthy. 
-      5. Output format: Return strictly a JSON list of 3 to 5 insight bullet points.
+      5. Output format: Return strictly a JSON object with two arrays: "insights" (3 to 5 insight bullet points) and "execution" (3 to 5 actionable points the user can do to become a better version of themselves).
       
-      Return ONLY a JSON array of strings.
+      Return ONLY a JSON object.
       Example format:
-      [
-        "Insight 1...",
-        "Insight 2..."
-      ]
+      {
+        "insights": [
+          "Insight 1...",
+          "Insight 2..."
+        ],
+        "execution": [
+          "Actionable point 1...",
+          "Actionable point 2..."
+        ]
+      }
     `;
 
     const result = await model.generateContent(prompt);
     let parsed;
     try {
       parsed = JSON.parse(result.response.text().replace(/```json|```/g, "").trim());
+      if (!parsed.insights) parsed.insights = [];
+      if (!parsed.execution) parsed.execution = [];
     } catch (e) {
       console.warn("Failed to parse Insights JSON, building fallback array:", e);
       // Fallback simple split if parsing fails
       const text = result.response.text();
-      parsed = text.split("\n").map(l => l.replace(/^[-\*\s\d\.\"]+|[\"\s,]+$/g, "").trim()).filter(l => l.length > 10);
+      const fallbackArray = text.split("\n").map(l => l.replace(/^[-\*\s\d\.\"]+|[\"\s,]+$/g, "").trim()).filter(l => l.length > 10);
+      parsed = { insights: fallbackArray, execution: [] };
     }
     return parsed;
   } catch (error) {
     console.error("Gemini Atlas Insights Error:", error);
-    return ["I was unable to retrieve your pattern correlations this time. Let's check back in shortly."];
+    return { insights: ["I was unable to retrieve your pattern correlations this time. Let's check back in shortly."], execution: [] };
   }
 }
 

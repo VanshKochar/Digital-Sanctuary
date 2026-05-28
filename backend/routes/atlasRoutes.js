@@ -93,8 +93,8 @@ router.get('/insights', async (req, res) => {
 
   try {
     const logs = await AtlasLog.find({ sessionId }).sort({ date: 1 });
-    const insights = await getAtlasInsights(logs);
-    res.json({ insights });
+    const insightsData = await getAtlasInsights(logs);
+    res.json(insightsData);
   } catch (error) {
     console.error('Atlas Get Insights Error:', error);
     res.status(500).json({ error: 'Something went wrong while compiling your patterns.' });

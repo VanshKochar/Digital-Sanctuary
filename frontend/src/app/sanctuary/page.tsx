@@ -53,6 +53,8 @@ export default function Sanctuary() {
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncStatus, setSyncStatus] = useState<"idle" | "success" | "error">("idle");
 
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       let id = localStorage.getItem("atlas_session_id");
@@ -62,7 +64,44 @@ export default function Sanctuary() {
       }
       setSessionId(id);
     }
+
+    // Initialize audio
+    if (!audioRef.current) {
+      audioRef.current = new Audio();
+      audioRef.current.loop = true;
+    }
+
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = "";
+      }
+    };
   }, []);
+
+  // Manage Audio Playback
+  useEffect(() => {
+    if (!audioRef.current) return;
+
+    if (selectedSound === "silence") {
+      audioRef.current.pause();
+    } else {
+      let src = "";
+      if (selectedSound === "rain") src = "https://actions.google.com/sounds/v1/water/rain_on_roof.ogg";
+      if (selectedSound === "forest") src = "https://actions.google.com/sounds/v1/ambiences/forest_morning.ogg";
+      if (selectedSound === "wind") src = "https://actions.google.com/sounds/v1/weather/strong_wind.ogg";
+      
+      if (audioRef.current.src !== src) {
+        audioRef.current.src = src;
+      }
+      
+      if (isActive && !isMuted) {
+        audioRef.current.play().catch(e => console.log("Audio play failed:", e));
+      } else {
+        audioRef.current.pause();
+      }
+    }
+  }, [selectedSound, isActive, isMuted]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -154,7 +193,7 @@ export default function Sanctuary() {
   const progress = ((selectedMinutes * 60 - timeLeft) / (selectedMinutes * 60)) * circumference;
 
   return (
-    <main className="relative min-h-screen flex flex-col font-sans overflow-hidden bg-[#EAEBE6]">
+    <main className="relative min-h-screen flex flex-col font-sans overflow-y-auto overflow-x-hidden bg-[#EAEBE6]">
       {/* Background Image */}
       <div 
         className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000"
@@ -167,7 +206,7 @@ export default function Sanctuary() {
       {/* Header */}
       <header className="relative z-10 w-full flex items-center justify-between p-6 lg:p-8">
         <Link
-          href="/inner-atlas"
+          href="/"
           className="w-12 h-12 flex items-center justify-center bg-white/70 hover:bg-white border border-white/60 text-brand-forest rounded-full backdrop-blur-md shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-brand-forest/30"
           aria-label="Back"
         >
@@ -225,7 +264,7 @@ export default function Sanctuary() {
           </div>
 
           {/* Central Timer */}
-          <div className="flex flex-col items-center justify-center relative">
+          <div className="flex flex-col items-center justify-center relative shrink-0 mb-8 lg:mb-0">
             <div className="relative flex items-center justify-center w-[340px] h-[340px] lg:w-[400px] lg:h-[400px]">
               
               {/* Soft pulsing glow behind timer */}
@@ -307,7 +346,7 @@ export default function Sanctuary() {
             </div>
 
             {/* Play/Pause Controls */}
-            <div className="flex items-center justify-center gap-6 mt-8 z-10">
+            <div className="flex items-center justify-center gap-6 mt-12 mb-4 z-10">
               <button
                 onClick={resetTimer}
                 disabled={timeLeft === selectedMinutes * 60 && !isCompleted}
@@ -358,7 +397,7 @@ export default function Sanctuary() {
       </section>
 
       {/* Bottom Controls */}
-      <div className="relative z-10 flex flex-col items-center justify-end pb-8 lg:pb-12 mt-auto w-full gap-6">
+      <div className="relative z-10 flex flex-col items-center justify-end pb-8 lg:pb-12 mt-auto w-full gap-6 shrink-0">
         
         {/* Time Presets Pill */}
         <div className="bg-white/70 backdrop-blur-md border border-white/50 rounded-full p-1.5 flex items-center gap-1 shadow-sm">

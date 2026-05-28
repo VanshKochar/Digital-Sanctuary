@@ -246,6 +246,7 @@ export default function InnerAtlas() {
   const [sessionId, setSessionId] = useState("");
   const [historyLogs, setHistoryLogs] = useState<AtlasLog[]>([]);
   const [insights, setInsights] = useState<string[]>([]);
+  const [execution, setExecution] = useState<string[]>([]);
   const [weeklyLetter, setWeeklyLetter] = useState("");
   const [isDashboardOpen, setIsDashboardOpen] = useState(false);
 
@@ -315,6 +316,7 @@ export default function InnerAtlas() {
       setLoadingInsights(true);
       const res = await axios.get(getApiUrl(`/insights?sessionId=${sessionId}`));
       setInsights(res.data.insights || []);
+      setExecution(res.data.execution || []);
     } catch (e) { console.error("Insights error:", e); }
     finally { insightsLoadingRef.current = false; setLoadingInsights(false); }
   }, [sessionId]);
@@ -742,7 +744,7 @@ export default function InnerAtlas() {
             <ChevronLeft className="w-5 h-5 text-sacred-blush" />
           </Link>
           <div>
-            <h1 className="text-3xl md:text-4xl font-serif text-text-primary tracking-tight">🗺️ Inner Atlas</h1>
+            <h1 className="text-3xl md:text-4xl font-serif text-text-primary tracking-tight">Inner Atlas</h1>
             <p className="text-xs font-serif italic text-text-secondary mt-0.5">Your emotional landscape, mapped in silence.</p>
           </div>
         </div>
@@ -874,23 +876,49 @@ export default function InnerAtlas() {
                         <div key={i} className="h-2.5 bg-brand-peach/60 rounded-full animate-pulse" style={{ width: `${w}%` }} />
                       ))}
                     </div>
-                  ) : insights.length === 0 ? (
+                  ) : insights.length === 0 && execution.length === 0 ? (
                     <p className="text-xs italic text-brand-forest/70">Log a few days to unlock AI pattern correlations.</p>
                   ) : (
-                    <ul className="space-y-3">
-                      {insights.map((insight, i) => (
-                        <motion.li
-                          key={i}
-                          initial={prefersReducedMotion ? {} : { opacity: 0, x: -5 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: i * 0.08, duration: 0.4 }}
-                          className="text-xs text-brand-forest/90 leading-relaxed flex items-start gap-2 font-serif italic"
-                        >
-                          <span className="text-brand-forest mt-0.5 shrink-0">✦</span>
-                          <span>{insight}</span>
-                        </motion.li>
-                      ))}
-                    </ul>
+                    <>
+                      {insights.length > 0 && (
+                        <ul className="space-y-3">
+                          {insights.map((insight, i) => (
+                            <motion.li
+                              key={i}
+                              initial={prefersReducedMotion ? {} : { opacity: 0, x: -5 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ delay: i * 0.08, duration: 0.4 }}
+                              className="text-xs text-brand-forest/90 leading-relaxed flex items-start gap-2 font-serif italic"
+                            >
+                              <span className="text-brand-forest mt-0.5 shrink-0">✦</span>
+                              <span>{insight}</span>
+                            </motion.li>
+                          ))}
+                        </ul>
+                      )}
+                      
+                      {execution.length > 0 && (
+                        <div className="mt-6 pt-4 border-t border-brand-peach/40">
+                          <h4 className="text-sm font-serif font-bold tracking-widest text-brand-forest mb-3 flex items-center gap-2">
+                            ⚡ Execution
+                          </h4>
+                          <ul className="space-y-3">
+                            {execution.map((exec, i) => (
+                              <motion.li
+                                key={`exec-${i}`}
+                                initial={prefersReducedMotion ? {} : { opacity: 0, x: -5 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: i * 0.08, duration: 0.4 }}
+                                className="text-xs text-brand-forest/90 leading-relaxed flex items-start gap-2 font-serif"
+                              >
+                                <span className="text-brand-peach mt-0.5 shrink-0 font-bold">►</span>
+                                <span>{exec}</span>
+                              </motion.li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </>
                   )}
                 </article>
 
